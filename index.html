@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CEMON</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  </head>
+  
+  <body>
+
+    <div class="container"><h1>CEMON</h1></div>
+
+    <div class="container">
+      <h2>Componentes del servicio</h2>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nombre del componente</th>
+            <th>Disponibilidad</th>
+            
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Hardware servidor</td>
+            <td id="d1"></td>
+        
+          </tr>      
+          <tr class="success">
+            <td>Base de Datos</td>
+            <td id="d2"></td>
+            
+          </tr>
+          <tr class="danger">
+            <td>Aplicación</td>
+            <td id="d3"></td>
+          
+          </tr>
+          <tr class="info">
+            <td>Enlace Internet</td>
+            <td id="d4"></td>
+            
+          </tr>
+          <tr class="warning">
+            <td>Router Internet</td>
+            <td id="d5"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="container"><button onclick="hola()">Consultar Disponibilidad</button></div>
+    <br>
+    <div class="container" id = "msj"></div>
+
+    <script type="text/javascript">
+
+      function hola() {
+
+        var hs;
+        var bd;
+        var ap;
+        var ei;
+        var ri;
+        var my_disp;
+
+        hs = consumir('http://localhost:3081/componente/Hardware_servidor','d1');
+        bd = consumir('http://localhost:3082/componente/Base_Datos','d2');
+        ap = consumir('http://localhost:3083/componente/Aplicacion','d3');
+        ei = consumir('http://localhost:3084/componente/Enlace Internet','d4');
+        ri = consumir('http://localhost:3085/componente/Router Internet','d5');
+        
+        var disponibilidad_servicio = hs*bd*ap*ei*ri;
+        if (disponibilidad_servicio == 0) {
+          document.getElementById("msj").innerHTML = "Disponibilidad del servicio: El servicio no se encuentra disponible"; 
+        } else {
+          document.getElementById("msj").innerHTML = "Disponibilidad del servicio: El servicio se encuentra disponible, la disponibilidad es " + disponibilidad_servicio; 
+        }
+      }
+
+      function consumir(peticion,componente){
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', peticion, true);
+        
+        if (xhr.status == 0) { 
+          document.getElementById(componente).innerHTML= "Host no responde";
+          my_disp = 0;
+        }
+
+        xhr.onload = function () {
+          if (xhr.readyState === xhr.DONE) {
+            if (xhr.status === 200) {
+              // console.log("$"+xhr.response+"$");
+              var x = xhr.response;
+              var obj = JSON.parse(x);
+              document.getElementById(componente).innerHTML = obj["disponibilidad"];
+              var y = obj["disponibilidad"];
+              console.log(y);
+              my_disp = y;
+            }
+          }
+        };
+        xhr.send(null);
+
+        return my_disp;
+      }
+    </script>
+
+  </body>
+</html>
